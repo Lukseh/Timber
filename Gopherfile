@@ -1,0 +1,15 @@
+name: timber
+version: 0.0.1
+go: 1.26.2
+description: Golang build tool
+
+build:
+  release:
+    entryfile: main.go
+    outname: Timber.exe
+    options:
+    watch: false
+    dockerize: false
+
+test:
+
