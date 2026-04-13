@@ -13,12 +13,16 @@ import (
 	"golang.org/x/mod/semver"
 )
 
+type BuildMode string
+const (
+  ModeWatch BuildMode = "watch"
+)
+
 type BuildEntry struct {
 	Entryfile  string
 	Outname    string
 	Options    string
-	Watch      bool           // Whenever to watch file for changes and automatically rebuild
-	Dockerize  bool           // Whenever to build Dockerfile
+	mode BuildMode
 	Dockerfile string         // Dockerfile location
 	Env        map[string]any // Env mapping
 }
@@ -136,23 +140,9 @@ func build(gf *Gopherfile, name string) {
 	if name != "release" {
 		fmt.Println("Building", name)
 	}
-	if v.Watch {
-		var main gow.Main
-		defer main.Exit()
-		defer main.Deinit()
-		func(self *gow.Main) {
-			self.Opt.Init([]string{"run", v.Entryfile})
-			self.Term.Init(self)
-			self.ChanRestart.Init()
-			self.ChanKill.Init()
-			self.Cmd.Init(self)
-			self.Sig.Init(self)
-			self.WatchInit()
-			self.Stdio.Init(self)
-		}(&main)
-		main.Run()
-	} else {
-		goArgs := []string{"build"}
+ switch v.Mode {
+  case ModeBuild:
+  goArgs := []string{"build"}
 		if v.Outname != "" {
 			goArgs = append(goArgs, "-o", v.Outname)
 		} else {
@@ -173,5 +163,7 @@ func build(gf *Gopherfile, name string) {
 			fmt.Println(err)
 			os.Exit(1)
 		}
-	}
+  default:
+    os.Exit(1)
+  }
 }
