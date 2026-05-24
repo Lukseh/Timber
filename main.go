@@ -8,23 +8,25 @@ import (
 	"regexp"
 	"strings"
 
-	gow "github.com/mitranim/gow"
 	"go.yaml.in/yaml/v4"
 	"golang.org/x/mod/semver"
 )
 
 type BuildMode string
+
 const (
-  ModeWatch BuildMode = "watch"
+	ModeStandard BuildMode = "standard"
+	ModeWatch    BuildMode = "watch"
 )
 
 type BuildEntry struct {
-	Entryfile  string
-	Outname    string
-	Options    string
-	mode BuildMode
-	Dockerfile string         // Dockerfile location
-	Env        map[string]any // Env mapping
+	Entryfile   string
+	Outname     string
+	Options     string
+	mode        BuildMode
+	Dockerfile  string         // Dockerfile location
+	Env         map[string]any // Env mapping
+	CmdOverrite string         // instead of `go use for example `wails`
 }
 
 type Gopherfile struct {
@@ -140,9 +142,13 @@ func build(gf *Gopherfile, name string) {
 	if name != "release" {
 		fmt.Println("Building", name)
 	}
- switch v.Mode {
-  case ModeBuild:
-  goArgs := []string{"build"}
+	switch v.mode {
+	case ModeStandard:
+		cmdStart := "go"
+		if v.CmdOverrite != "" {
+			cmdStart = v.CmdOverrite
+		}
+		goArgs := []string{"build"}
 		if v.Outname != "" {
 			goArgs = append(goArgs, "-o", v.Outname)
 		} else {
@@ -156,14 +162,14 @@ func build(gf *Gopherfile, name string) {
 		} else {
 			goArgs = append(goArgs, "main.go")
 		}
-		cmd := exec.Command("go", goArgs...)
+		cmd := exec.Command(cmdStart, goArgs...)
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
 		if err := cmd.Run(); err != nil {
 			fmt.Println(err)
 			os.Exit(1)
 		}
-  default:
-    os.Exit(1)
-  }
+	default:
+		os.Exit(1)
+	}
 }
