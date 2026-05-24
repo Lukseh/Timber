@@ -1,5 +1,5 @@
 name: timber
-version: 0.0.3
+version: 0.0.4
 go: 1.25.0
 description: Golang build tool
 
