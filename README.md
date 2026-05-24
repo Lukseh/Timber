@@ -30,7 +30,7 @@ build: // Build scripts
     entryfile: main.go // main file of the project, default is main.go
     outname: Timber.exe // Output binary name, default is project name
     options: -ldflags="-s -w" // Additional options to pass to the go build command, default is empty
-    watch: false // Watch for file changes and re-build the command, default is false // Requires [gow](https://github.com/mitranim/gow)
+    watch: false // Watch for file changes and re-build the command, default is false
     dockerize: false // Whenever to build the project in a docker container, default is false // Requires [docker](https://www.docker.com/)
     dockerfile: Dockerfile // Dockerfile to use when dockerize is true, default is Dockerfile, for other scripts defaults to Dockerfile.scriptname, e.g. Dockerfile.dev
 ```

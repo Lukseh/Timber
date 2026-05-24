@@ -142,6 +142,9 @@ func build(gf *Gopherfile, name string) {
 	if name != "release" {
 		fmt.Println("Building", name)
 	}
+	if v.mode == "" {
+		v.mode = "standard"
+	}
 	switch v.mode {
 	case ModeStandard:
 		cmdStart := "go"
@@ -169,7 +172,5 @@ func build(gf *Gopherfile, name string) {
 			fmt.Println(err)
 			os.Exit(1)
 		}
-	default:
-		os.Exit(1)
 	}
 }
