@@ -189,7 +189,8 @@ func build(gf *Gopherfile, name string) {
 			goArgs = append(goArgs, "main.go")
 		}
 		cmd := exec.Command("go", goArgs...)
-		cmd.Env = maptoslice(v.Env)
+		fmt.Println(cmd.Env)
+		cmd.Env = append(cmd.Env, maptoslice(v.Env)...)
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
 		if err := cmd.Run(); err != nil {
