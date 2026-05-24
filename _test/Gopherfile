@@ -1,0 +1,12 @@
+name: helloworld
+version: 1.0.0
+go: 1.25.0
+description: example gopherfile
+build:
+    release:
+        entryfile: helloworld.go
+        outname: helloworld
+        options: ""
+        dockerfile: ""
+        env: {}
+        cmdoverrite: ""

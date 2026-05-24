@@ -1,5 +1,5 @@
 name: timber
-version: 0.0.2
+version: 0.0.3
 go: 1.25.0
 description: Golang build tool
 
@@ -9,7 +9,7 @@ build:
     outname: timber
     options:
     watch: false
-    dockerize: false
+    dockefile: false
 
 test:
 

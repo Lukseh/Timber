@@ -26,7 +26,7 @@ type BuildEntry struct {
 	mode        BuildMode
 	Dockerfile  string         // Dockerfile location
 	Env         map[string]any // Env mapping
-	CmdOverrite string         // instead of `go use for example `wails`
+	CmdOverrite string         // instead of `go` use for example `wails`
 }
 
 type Gopherfile struct {
@@ -50,17 +50,34 @@ func init() {
 
 func main() {
 	if len(args) > 0 && args[0] == "init" {
-		f, err := os.OpenFile("Gopherfile", os.O_CREATE, 0644)
+		f, err := os.OpenFile("Gopherfile", os.O_CREATE|os.O_WRONLY, 0644)
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(-1)
 		}
-		c, err := yaml.Marshal(Gopherfile{})
+		helloworld := Gopherfile{
+			Name:        "helloworld",
+			Version:     "1.0.0",
+			Go:          "1.25.0",
+			Description: "example gopherfile",
+			Build: map[string]BuildEntry{
+				"release": {
+					Entryfile:  "helloworld.go",
+					Outname:    "helloworld",
+					Options:    "",
+					mode:       ModeStandard,
+					Dockerfile: "",
+				},
+			},
+		}
+		c, err := yaml.Marshal(helloworld)
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(-1)
 		}
-		f.Write(c)
+		if _, err := f.Write(c); err != nil {
+			fmt.Println(err)
+		}
 		f.Sync()
 		f.Close()
 		os.Exit(0)
@@ -147,9 +164,15 @@ func build(gf *Gopherfile, name string) {
 	}
 	switch v.mode {
 	case ModeStandard:
-		cmdStart := "go"
 		if v.CmdOverrite != "" {
-			cmdStart = v.CmdOverrite
+			c := strings.Split(v.CmdOverrite, " ")
+			cmd := exec.Command(c[0], c[1:]...)
+			cmd.Stdout = os.Stdout
+			cmd.Stderr = os.Stderr
+			if err := cmd.Run(); err != nil {
+				fmt.Println(err)
+				os.Exit(1)
+			}
 		}
 		goArgs := []string{"build"}
 		if v.Outname != "" {
@@ -165,7 +188,8 @@ func build(gf *Gopherfile, name string) {
 		} else {
 			goArgs = append(goArgs, "main.go")
 		}
-		cmd := exec.Command(cmdStart, goArgs...)
+		cmd := exec.Command("go", goArgs...)
+		cmd.Env = maptoslice(v.Env)
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
 		if err := cmd.Run(); err != nil {
@@ -173,4 +197,12 @@ func build(gf *Gopherfile, name string) {
 			os.Exit(1)
 		}
 	}
+}
+
+func maptoslice(s map[string]any) []string {
+	var r []string
+	for k, v := range s {
+		r = append(r, fmt.Sprintf("%s=%v", k, v))
+	}
+	return r
 }
