@@ -1,4 +1,4 @@
-module github.com/Lukseh/Timber
+module github.com/Lukseh/timber
 
 go 1.25.0
 
